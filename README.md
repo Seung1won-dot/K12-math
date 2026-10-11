@@ -1,10 +1,10 @@
-# math-k12 — 초·중·고 수학 전체 정리
+# K12-math — 초·중·고 수학 전체 정리
 
 대학 입학 이전에 배우는 모든 수학 개념과 공식을 학년·학기·단원 순으로 정리한 공개 정적 사이트.
 수학에 어려움을 겪는 학생이 "막힌 단원 → 먼저 볼 단원"을 따라 앞 학년으로 되돌아갈 수 있게 만드는 것이 목표다.
 기준 교육과정은 2022 개정 교육과정(수학과). 개발계획서 v0.1(2026-10-11) 기준.
 
-- 사이트: https://seung1won-dot.github.io/math-k12/
+- 사이트: https://seung1won-dot.github.io/K12-math/
 - 스택: Astro 7 · Markdown + frontmatter · KaTeX · Pagefind · GitHub Pages
 
 ## 명령어

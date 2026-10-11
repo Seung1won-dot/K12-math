@@ -5,10 +5,10 @@ import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import pagefind from 'astro-pagefind';
 
-// GitHub Pages: https://seung1won-dot.github.io/math-k12/
+// GitHub Pages: https://seung1won-dot.github.io/K12-math/
 export default defineConfig({
   site: 'https://seung1won-dot.github.io',
-  base: '/math-k12',
+  base: '/K12-math',
   trailingSlash: 'always',
   integrations: [pagefind()],
   markdown: {

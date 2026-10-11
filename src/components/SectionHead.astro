@@ -1,0 +1,19 @@
+---
+/** 라벨(오렌지) → 제목(강조 단어만 <em>) → 설명. 모든 섹션 머리글은 이걸로 통일한다. */
+interface Props {
+  eyebrow?: string;
+  title: string; // "<em>한 단어</em>" 허용
+  lead?: string;
+  size?: 'md' | 'lg' | 'display';
+  as?: 'h1' | 'h2';
+  aside?: string;
+}
+const { eyebrow, title, lead, size = 'md', as = 'h2', aside } = Astro.props;
+const Tag = as;
+---
+<header class:list={['sechead', size !== 'md' && `sechead--${size}`]}>
+  {eyebrow && <span class="sechead__eyebrow">{eyebrow}</span>}
+  <Tag class="sechead__title" set:html={title} />
+  {lead && <p class="sechead__lead">{lead}</p>}
+  {aside && <p class="sechead__aside">{aside}</p>}
+</header>

@@ -1,9 +1,9 @@
 ---
 import Base from '../layouts/Base.astro';
+import SectionHead from '../components/SectionHead.astro';
 import Search from 'astro-pagefind/components/Search.astro';
 ---
-<Base title="검색">
-  <h1>검색</h1>
-  <p class="muted">단원명, 공식, 키워드로 전 학년을 한 번에 찾습니다. 검색 인덱스는 빌드 시 생성되므로 <code>npm run build</code> 후 <code>npm run preview</code>에서 동작합니다.</p>
-  <Search id="search" className="pagefind-ui" searchboxOptions={{ placeholder: '예: 피타고라스, 분수 나눗셈' }} />
+<Base title="검색" section="search">
+  <SectionHead as="h1" size="lg" eyebrow="전 학년 통합" title="무엇이 <em>막혔나요</em>" lead="단원명, 공식, 키워드로 초등부터 고등까지 한 번에 찾습니다. 학생이 묻는 말투 그대로 쳐도 됩니다." />
+  <Search id="search" className="pagefind-ui" searchboxOptions={{ placeholder: '예: 피타고라스, 분수 나눗셈 왜 뒤집어', autofocus: true }} />
 </Base>

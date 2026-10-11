@@ -1,31 +1,44 @@
 ---
 import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
+import SectionHead from '../components/SectionHead.astro';
 import { LEVEL_LABEL, levelUrl, progress, parseId, withBase, type Level } from '../lib/units';
 
 const all = await getCollection('units');
 const levels: Level[] = ['elem', 'mid', 'high'];
 const total = progress(all);
+const written = all.filter((u) => u.data.status !== 'todo').length;
 ---
 <Base title="수학 전체 정리">
-  <h1>초등부터 고등까지, 수학 한눈에</h1>
-  <p class="muted">대학 입학 전에 배우는 모든 수학 개념과 공식을 학년·학기·단원 순으로 정리합니다. 막히는 단원이 있으면 "먼저 볼 단원"을 따라 앞 학년으로 돌아가 보세요.</p>
+  <section class="hero">
+    <SectionHead as="h1" size="display" eyebrow="초등 1학년부터 고등 3학년까지" title="수학을 <em>한눈에</em>, 막히면 앞 학년으로" lead="대학 입학 전에 배우는 모든 수학 개념과 공식을 학년·학기·단원 순으로 정리합니다. 어려운 단원 위에는 먼저 볼 단원이 있습니다. 거기서부터 다시 읽으면 됩니다." />
+    <a class="search-cta" href={withBase('/search/')}>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      단원명, 공식, "분수 나눗셈 왜 뒤집어" 같은 질문으로 검색
+    </a>
+  </section>
 
-  <p><a class="card" href={withBase('/search/')}>🔍 단원명·공식·키워드로 검색</a></p>
-
+  <SectionHead eyebrow="학교급" title="어디서부터 <em>볼까</em>" lead="학년과 학기를 고르면 단원 목록이 나옵니다." />
   <div class="cards">
     {levels.map((lv) => {
       const units = all.filter((u) => parseId(u.data.id).level === lv);
       const p = progress(units);
+      const w = units.filter((u) => u.data.status !== 'todo').length;
       return (
         <a class="card" href={levelUrl(lv)}>
-          <h3>{LEVEL_LABEL[lv]}</h3>
-          <div class="bar"><span style={`width:${p.pct}%`}></span></div>
-          <small class="muted">{p.done} / {p.total} 단원 검토 완료 ({p.pct}%)</small>
+          <span class="card__eyebrow">{lv === 'elem' ? '1~6학년' : lv === 'mid' ? '1~3학년' : '공통·선택과목'}</span>
+          <h3 class="card__title">{LEVEL_LABEL[lv]}</h3>
+          <div class="bar"><span style={`width:${p.total ? Math.round((w / p.total) * 100) : 0}%`}></span></div>
+          <span class="card__meta">{w} / {p.total} 단원 작성 · 검토 완료 {p.done}</span>
         </a>
       );
     })}
   </div>
 
-  <p class="muted">전체 진행률: {total.done} / {total.total} 단원 검토 완료, 초안 {total.draft}개</p>
+  <SectionHead eyebrow="진행 상황" title="지금까지 <em>얼마나</em> 채웠나" />
+  <div class="cards">
+    <div class="card card--glass"><span class="card__eyebrow">전체 단원</span><div class="kpi">{total.total}<small>개</small></div></div>
+    <div class="card card--glass"><span class="card__eyebrow">작성된 단원</span><div class="kpi">{written}<small>개</small></div></div>
+    <div class="card card--glass"><span class="card__eyebrow">검토 완료</span><div class="kpi">{total.done}<small>개</small></div></div>
+  </div>
 </Base>

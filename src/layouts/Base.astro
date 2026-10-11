@@ -1,14 +1,22 @@
 ---
 import 'katex/dist/katex.min.css';
 import '../styles/global.css';
+import ThemeToggle from '../components/ThemeToggle.astro';
 import { withBase } from '../lib/units';
 
 interface Props {
   title: string;
   description?: string;
+  section?: 'elem' | 'mid' | 'high' | 'search';
 }
-const { title, description = '초등부터 고등까지 수학 개념과 공식을 학년별로 정리한 사이트' } = Astro.props;
+const { title, description = '초등부터 고등까지 수학 개념과 공식을 학년별로 정리한 사이트', section } = Astro.props;
 const siteName = '수학 전체 정리';
+const nav = [
+  { href: withBase('/elem/'), label: '초등', key: 'elem' },
+  { href: withBase('/mid/'), label: '중등', key: 'mid' },
+  { href: withBase('/high/'), label: '고등', key: 'high' },
+  { href: withBase('/search/'), label: '검색', key: 'search' },
+];
 ---
 
 <!doctype html>
@@ -18,27 +26,32 @@ const siteName = '수학 전체 정리';
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="generator" content={Astro.generator} />
     <meta name="description" content={description} />
-    <meta name="color-scheme" content="light dark" />
+    <meta name="color-scheme" content="dark light" />
     <link rel="icon" type="image/svg+xml" href={withBase('/favicon.svg')} />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
     <title>{title === siteName ? title : `${title} · ${siteName}`}</title>
+    <script is:inline>
+      /* 깜빡임 방지: 저장된 테마가 있으면 첫 페인트 전에 적용 */
+      try { var t = localStorage.getItem('k12-math:theme'); if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t; } catch (e) {}
+    </script>
   </head>
   <body>
     <header class="site-header">
-      <a class="brand" href={withBase('/')}>{siteName}</a>
-      <nav>
-        <a href={withBase('/elem/')}>초등</a>
-        <a href={withBase('/mid/')}>중등</a>
-        <a href={withBase('/high/')}>고등</a>
-        <a href={withBase('/search/')}>검색</a>
-      </nav>
+      <div class="site-header__inner">
+        <a class="brand" href={withBase('/')}><span class="brand__mark" aria-hidden="true">∑</span><span class="brand__text">{siteName}</span></a>
+        <nav class="site-nav" aria-label="주요 메뉴">
+          {nav.map((n) => <a href={n.href} aria-current={section === n.key ? 'page' : undefined}>{n.label}</a>)}
+          <ThemeToggle />
+        </nav>
+      </div>
     </header>
     <main class="container">
       <slot />
     </main>
     <footer class="site-footer">
-      <p>2022 개정 교육과정 기준. 콘텐츠 CC BY-NC-SA 4.0 · 코드 MIT.</p>
-      <p><a href="https://github.com/Seung1won-dot/K12-math">GitHub</a></p>
+      <div class="site-footer__inner">
+        <p>2022 개정 교육과정 기준 · 콘텐츠 CC BY-NC-SA 4.0 · 코드 MIT</p>
+        <p><a href="https://github.com/Seung1won-dot/K12-math">GitHub</a></p>
+      </div>
     </footer>
   </body>
 </html>

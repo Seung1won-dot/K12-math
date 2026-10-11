@@ -21,37 +21,40 @@ const next = siblings[idx + 1];
 const prereqs = d.prerequisites.map((id) => byId.get(id)).filter(Boolean) as Unit[];
 const nexts = d.next.map((id) => byId.get(id)).filter(Boolean) as Unit[];
 const isEmpty = d.status === 'todo';
+const issueUrl = `https://github.com/Seung1won-dot/K12-math/issues/new?title=${encodeURIComponent(`[${d.id}] ${d.title} 오류 신고`)}`;
 ---
-<Base title={d.title} description={`${d.level} ${d.grade} ${d.term ?? ''} ${d.title} — 핵심 개념, 공식, 자주 하는 실수`}>
+<Base title={d.title} description={`${d.level} ${d.grade} ${d.term ?? ''} ${d.title} — 핵심 개념, 공식, 자주 하는 실수`} section={level}>
   <article data-pagefind-body>
-    <p class="muted" style="margin:16px 0 0">
-      <a href={levelUrl(level)}>{LEVEL_LABEL[level]}</a> › <a href={`${levelUrl(level)}#${group}`}>{groupLabel(level, group)}</a>
-    </p>
-    <h1>{d.title}</h1>
-    <div class="meta">
-      <span class="tag">{d.area}</span>
-      <span class={`badge ${d.status}`} data-pagefind-ignore>{STATUS_LABEL[d.status]}</span>
-      {d.reviewedAt && <span data-pagefind-ignore> · 최종 검토 {d.reviewedAt.toISOString().slice(0, 10)}</span>}
-      <span data-pagefind-meta={`keywords:${d.keywords.join(', ')}`} hidden></span>
-    </div>
+    <nav class="crumbs" aria-label="현재 위치" data-pagefind-ignore>
+      <a href={levelUrl(level)}>{LEVEL_LABEL[level]}</a><span>›</span><a href={`${levelUrl(level)}#${group}`}>{groupLabel(level, group)}</a>
+    </nav>
+    <header class="unit-head">
+      <h1>{d.title}</h1>
+      <div class="unit-head__meta">
+        <span class="chip">{d.area}</span>
+        <span class={`chip chip--${d.status}`} data-pagefind-ignore>{STATUS_LABEL[d.status]}</span>
+        {d.reviewedAt && <span data-pagefind-ignore>최종 검토 {d.reviewedAt.toISOString().slice(0, 10)}</span>}
+        <span data-pagefind-meta={`keywords:${d.keywords.join(', ')}`} hidden></span>
+      </div>
+    </header>
 
     {prereqs.length > 0 && (
-      <div class="callout">
-        <h3>이 단원이 어려우면 먼저 볼 단원</h3>
-        <ul>{prereqs.map((u) => <li><a href={unitUrl(u.data.id)}>{u.data.title}</a> <small class="muted">({u.data.level} {u.data.grade})</small></li>)}</ul>
-      </div>
+      <aside class="callout" data-pagefind-ignore>
+        <p class="callout__title">이 단원이 어려우면 먼저 볼 단원</p>
+        <ul>{prereqs.map((u) => <li><a href={unitUrl(u.data.id)}>{u.data.title}</a> <span class="muted">{u.data.level} {u.data.grade}{u.data.term ? ` ${u.data.term}` : ''}</span></li>)}</ul>
+      </aside>
     )}
 
     {isEmpty ? (
-      <div class="callout todo" data-pagefind-ignore>
-        <h3>아직 작성되지 않은 단원입니다</h3>
-        <p>단원 목록에는 등록됐지만 내용은 준비 중입니다. 키워드: {d.keywords.join(', ') || '없음'}</p>
+      <div class="callout callout--todo" data-pagefind-ignore>
+        <p class="callout__title">아직 작성되지 않은 단원입니다</p>
+        <p class="text-2">단원 목록에는 등록됐지만 내용은 준비 중입니다. 키워드: {d.keywords.join(', ') || '없음'}</p>
       </div>
     ) : (
       <>
         {headings.length > 0 && (
-          <nav class="muted" style="font-size:0.9rem" data-pagefind-ignore>
-            목차: {headings.filter((h) => h.depth === 2).map((h, i) => <span>{i > 0 && ' · '}<a href={`#${h.slug}`}>{h.text}</a></span>)}
+          <nav class="toc" aria-label="단원 목차" data-pagefind-ignore>
+            {headings.filter((h) => h.depth === 2).map((h) => <a href={`#${h.slug}`}>{h.text}</a>)}
           </nav>
         )}
         <div class="prose"><Content /></div>
@@ -59,19 +62,17 @@ const isEmpty = d.status === 'todo';
     )}
 
     {nexts.length > 0 && (
-      <div class="callout" data-pagefind-ignore>
-        <h3>이 다음에 배우는 단원</h3>
-        <ul>{nexts.map((u) => <li><a href={unitUrl(u.data.id)}>{u.data.title}</a> <small class="muted">({u.data.level} {u.data.grade})</small></li>)}</ul>
-      </div>
+      <aside class="callout" data-pagefind-ignore>
+        <p class="callout__title">이 다음에 배우는 단원</p>
+        <ul>{nexts.map((u) => <li><a href={unitUrl(u.data.id)}>{u.data.title}</a> <span class="muted">{u.data.level} {u.data.grade}{u.data.term ? ` ${u.data.term}` : ''}</span></li>)}</ul>
+      </aside>
     )}
     {d.note && <p class="muted" data-pagefind-ignore>비고: {d.note}</p>}
   </article>
 
-  <nav class="pager">
-    {prev ? <a href={unitUrl(prev.data.id)}>← {prev.data.title}</a> : <span />}
-    {next ? <a href={unitUrl(next.data.id)}>{next.data.title} →</a> : <span />}
+  <nav class="pager" aria-label="이전·다음 단원">
+    {prev ? <a href={unitUrl(prev.data.id)}><span>이전 단원</span>{prev.data.title}</a> : <span />}
+    {next ? <a class="next" href={unitUrl(next.data.id)}><span>다음 단원</span>{next.data.title}</a> : <span />}
   </nav>
-  <p class="muted" style="margin-top:24px;font-size:0.85rem">
-    틀린 내용을 찾으셨나요? <a href={`https://github.com/Seung1won-dot/K12-math/issues/new?title=${encodeURIComponent(`[${d.id}] ${d.title} 오류 신고`)}`} target="_blank" rel="noopener">오류 신고</a>
-  </p>
+  <p class="report">틀린 내용을 찾으셨나요? <a href={issueUrl} target="_blank" rel="noopener">오류 신고</a></p>
 </Base>

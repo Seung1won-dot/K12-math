@@ -1,6 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import Base from '../../layouts/Base.astro';
+import SectionHead from '../../components/SectionHead.astro';
 import UnitList from '../../components/UnitList.astro';
 import { LEVEL_LABEL, groupBy, groupLabel, parseId, progress, type Level } from '../../lib/units';
 
@@ -11,14 +12,15 @@ const level = Astro.params.level as Level;
 const units = (await getCollection('units')).filter((u) => parseId(u.data.id).level === level);
 const groups = groupBy(units);
 const p = progress(units);
+const written = units.filter((u) => u.data.status !== 'todo').length;
+const lead = { elem: '개념이 처음 나오는 곳입니다. 그림과 구체물로 뜻을 익히는 설명 위주로 씁니다.', mid: '공식과 오개념이 가장 많이 모이는 구간입니다. 지도할 때 활용도가 가장 높습니다.', high: '공통과목부터 선택과목까지. 수능 공통 범위는 상세히, 나머지는 요약 수준으로 씁니다.' }[level];
 ---
-<Base title={LEVEL_LABEL[level]}>
-  <h1>{LEVEL_LABEL[level]}</h1>
-  <p class="muted">{p.done} / {p.total} 단원 검토 완료</p>
-  {groups.size === 0 && <p class="callout todo">아직 등록된 단원이 없습니다. <code>data/units.json</code>에 단원을 추가하고 <code>npm run stubs</code>를 실행하세요.</p>}
+<Base title={LEVEL_LABEL[level]} section={level}>
+  <SectionHead as="h1" size="lg" eyebrow="학교급" title={`${LEVEL_LABEL[level]} <em>수학</em>`} lead={lead} aside={`${units.length}개 단원 · 작성 ${written} · 검토 완료 ${p.done}`} />
+  {groups.size === 0 && <div class="callout callout--todo"><p class="callout__title">아직 등록된 단원이 없습니다</p><p class="muted"><code>data/units.json</code>에 단원을 추가하고 <code>npm run stubs</code>를 실행하세요.</p></div>}
   {[...groups.entries()].map(([group, list]) => (
-    <section>
-      <h2 id={group}>{groupLabel(level, group)}</h2>
+    <section class="term">
+      <div class="term__head"><h2 id={group}>{groupLabel(level, group)}</h2><span class="count">{list.filter((u) => u.data.status !== 'todo').length} / {list.length}</span></div>
       <UnitList units={list} />
     </section>
   ))}

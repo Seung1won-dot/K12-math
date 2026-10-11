@@ -1,13 +1,17 @@
 ---
-import { STATUS_LABEL, unitUrl, type Unit } from '../lib/units';
+import { STATUS_LABEL, parseId, unitUrl, type Unit } from '../lib/units';
 interface Props { units: Unit[] }
 const { units } = Astro.props;
 ---
 <ul class="unit-list">
   {units.map((u) => (
     <li>
-      <span><span class="id">{u.data.id}</span><a href={unitUrl(u.data.id)}>{u.data.title}</a></span>
-      <span class={`badge ${u.data.status}`}>{STATUS_LABEL[u.data.status]}</span>
+      <a href={unitUrl(u.data.id)}>
+        <span class="seq">{String(parseId(u.data.id).seq).padStart(2, '0')}</span>
+        <span class="title">{u.data.title}</span>
+        <span class="area">{u.data.area}</span>
+        <span class={`chip chip--${u.data.status}`}>{STATUS_LABEL[u.data.status]}</span>
+      </a>
     </li>
   ))}
 </ul>

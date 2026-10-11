@@ -1,0 +1,31 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import { LEVEL_LABEL, levelUrl, progress, parseId, withBase, type Level } from '../lib/units';
+
+const all = await getCollection('units');
+const levels: Level[] = ['elem', 'mid', 'high'];
+const total = progress(all);
+---
+<Base title="수학 전체 정리">
+  <h1>초등부터 고등까지, 수학 한눈에</h1>
+  <p class="muted">대학 입학 전에 배우는 모든 수학 개념과 공식을 학년·학기·단원 순으로 정리합니다. 막히는 단원이 있으면 "먼저 볼 단원"을 따라 앞 학년으로 돌아가 보세요.</p>
+
+  <p><a class="card" href={withBase('/search/')}>🔍 단원명·공식·키워드로 검색</a></p>
+
+  <div class="cards">
+    {levels.map((lv) => {
+      const units = all.filter((u) => parseId(u.data.id).level === lv);
+      const p = progress(units);
+      return (
+        <a class="card" href={levelUrl(lv)}>
+          <h3>{LEVEL_LABEL[lv]}</h3>
+          <div class="bar"><span style={`width:${p.pct}%`}></span></div>
+          <small class="muted">{p.done} / {p.total} 단원 검토 완료 ({p.pct}%)</small>
+        </a>
+      );
+    })}
+  </div>
+
+  <p class="muted">전체 진행률: {total.done} / {total.total} 단원 검토 완료, 초안 {total.draft}개</p>
+</Base>

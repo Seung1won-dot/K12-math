@@ -1,0 +1,25 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import UnitList from '../../components/UnitList.astro';
+import { LEVEL_LABEL, groupBy, groupLabel, parseId, progress, type Level } from '../../lib/units';
+
+export function getStaticPaths() {
+  return (['elem', 'mid', 'high'] as Level[]).map((level) => ({ params: { level } }));
+}
+const level = Astro.params.level as Level;
+const units = (await getCollection('units')).filter((u) => parseId(u.data.id).level === level);
+const groups = groupBy(units);
+const p = progress(units);
+---
+<Base title={LEVEL_LABEL[level]}>
+  <h1>{LEVEL_LABEL[level]}</h1>
+  <p class="muted">{p.done} / {p.total} 단원 검토 완료</p>
+  {groups.size === 0 && <p class="callout todo">아직 등록된 단원이 없습니다. <code>data/units.json</code>에 단원을 추가하고 <code>npm run stubs</code>를 실행하세요.</p>}
+  {[...groups.entries()].map(([group, list]) => (
+    <section>
+      <h2 id={group}>{groupLabel(level, group)}</h2>
+      <UnitList units={list} />
+    </section>
+  ))}
+</Base>

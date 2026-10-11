@@ -1,0 +1,28 @@
+{
+  "name": "math-k12",
+  "type": "module",
+  "version": "0.0.1",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "stubs": "node scripts/gen-stubs.ts",
+    "validate": "node scripts/validate.ts",
+    "check": "npm run validate && npm run build"
+  },
+  "dependencies": {
+    "@astrojs/markdown-remark": "^7.3.2",
+    "astro": "^7.3.8",
+    "astro-pagefind": "^2.0.1",
+    "gray-matter": "^4.0.3",
+    "katex": "^0.19.0",
+    "pagefind": "^1.5.2",
+    "rehype-katex": "^7.0.1",
+    "remark-math": "^6.0.0"
+  },
+  "description": "초·중·고 수학 전체 정리 — 학년별 개념·공식·오개념 공개 사이트",
+  "license": "MIT"
+}

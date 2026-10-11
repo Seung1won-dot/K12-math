@@ -1,0 +1,77 @@
+---
+import { getCollection, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import { STATUS_LABEL, groupLabel, parseId, sortUnits, unitUrl, levelUrl, LEVEL_LABEL, type Unit } from '../../lib/units';
+
+export async function getStaticPaths() {
+  const units = await getCollection('units');
+  return units.map((unit) => ({ params: { id: unit.data.id }, props: { unit } }));
+}
+const { unit } = Astro.props as { unit: Unit };
+const all = await getCollection('units');
+const byId = new Map(all.map((u) => [u.data.id, u]));
+const { Content, headings } = await render(unit);
+const d = unit.data;
+const { level, group } = parseId(d.id);
+
+const siblings = sortUnits(all.filter((u) => parseId(u.data.id).level === level && parseId(u.data.id).group === group));
+const idx = siblings.findIndex((u) => u.data.id === d.id);
+const prev = siblings[idx - 1];
+const next = siblings[idx + 1];
+const prereqs = d.prerequisites.map((id) => byId.get(id)).filter(Boolean) as Unit[];
+const nexts = d.next.map((id) => byId.get(id)).filter(Boolean) as Unit[];
+const isEmpty = d.status === 'todo';
+---
+<Base title={d.title} description={`${d.level} ${d.grade} ${d.term ?? ''} ${d.title} — 핵심 개념, 공식, 자주 하는 실수`}>
+  <article data-pagefind-body>
+    <p class="muted" style="margin:16px 0 0">
+      <a href={levelUrl(level)}>{LEVEL_LABEL[level]}</a> › <a href={`${levelUrl(level)}#${group}`}>{groupLabel(level, group)}</a>
+    </p>
+    <h1>{d.title}</h1>
+    <div class="meta">
+      <span class="tag">{d.area}</span>
+      <span class={`badge ${d.status}`} data-pagefind-ignore>{STATUS_LABEL[d.status]}</span>
+      {d.reviewedAt && <span data-pagefind-ignore> · 최종 검토 {d.reviewedAt.toISOString().slice(0, 10)}</span>}
+      <span data-pagefind-meta={`keywords:${d.keywords.join(', ')}`} hidden></span>
+    </div>
+
+    {prereqs.length > 0 && (
+      <div class="callout">
+        <h3>이 단원이 어려우면 먼저 볼 단원</h3>
+        <ul>{prereqs.map((u) => <li><a href={unitUrl(u.data.id)}>{u.data.title}</a> <small class="muted">({u.data.level} {u.data.grade})</small></li>)}</ul>
+      </div>
+    )}
+
+    {isEmpty ? (
+      <div class="callout todo" data-pagefind-ignore>
+        <h3>아직 작성되지 않은 단원입니다</h3>
+        <p>단원 목록에는 등록됐지만 내용은 준비 중입니다. 키워드: {d.keywords.join(', ') || '없음'}</p>
+      </div>
+    ) : (
+      <>
+        {headings.length > 0 && (
+          <nav class="muted" style="font-size:0.9rem" data-pagefind-ignore>
+            목차: {headings.filter((h) => h.depth === 2).map((h, i) => <span>{i > 0 && ' · '}<a href={`#${h.slug}`}>{h.text}</a></span>)}
+          </nav>
+        )}
+        <div class="prose"><Content /></div>
+      </>
+    )}
+
+    {nexts.length > 0 && (
+      <div class="callout" data-pagefind-ignore>
+        <h3>이 다음에 배우는 단원</h3>
+        <ul>{nexts.map((u) => <li><a href={unitUrl(u.data.id)}>{u.data.title}</a> <small class="muted">({u.data.level} {u.data.grade})</small></li>)}</ul>
+      </div>
+    )}
+    {d.note && <p class="muted" data-pagefind-ignore>비고: {d.note}</p>}
+  </article>
+
+  <nav class="pager">
+    {prev ? <a href={unitUrl(prev.data.id)}>← {prev.data.title}</a> : <span />}
+    {next ? <a href={unitUrl(next.data.id)}>{next.data.title} →</a> : <span />}
+  </nav>
+  <p class="muted" style="margin-top:24px;font-size:0.85rem">
+    틀린 내용을 찾으셨나요? <a href={`https://github.com/Seung1won-dot/math-k12/issues/new?title=${encodeURIComponent(`[${d.id}] ${d.title} 오류 신고`)}`} target="_blank" rel="noopener">오류 신고</a>
+  </p>
+</Base>

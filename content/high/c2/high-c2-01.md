@@ -5,7 +5,7 @@ level: 고등학교
 grade: 공통수학2
 area: 도형의 방정식
 keywords: ["두 점 사이의 거리", "내분점", "외분점"]
-prerequisites: []
+prerequisites: ["mid-2-2-05", "mid-1-1-05"]
 next: []
 status: todo
 ---

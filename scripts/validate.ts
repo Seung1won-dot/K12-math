@@ -58,7 +58,8 @@ for (const { file, data, content } of docs) {
       else if (!ids.has(target)) err(`${key}의 ${target} 단원 파일이 없음`);
     }
     if ((status === 'reviewed' || status === 'published') && list.length === 0) err(`${key} 비어 있음 (reviewed 이상은 1개 이상 필요)`);
-    if (status === 'draft' && list.length === 0) warn(`${key} 비어 있음`);
+    const firstTerm = key === 'prerequisites' && parseId(data.id).level === 'elem' && parseId(data.id).group === '1-1';
+    if (status === 'draft' && list.length === 0 && !firstTerm) warn(`${key} 비어 있음`);
   }
   // 학년 역행 검사: prerequisites는 ID 순서상 앞에 있어야 함 (고등 과목 코드는 제외)
   for (const target of (data.prerequisites ?? []) as string[]) {

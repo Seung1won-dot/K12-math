@@ -50,6 +50,12 @@ for (const { file, data, content } of docs) {
     if (mis && !/바로잡|고치|교정|지도/.test(mis)) warn(`오개념 항목에 '어떻게 바로잡는가'가 없는 것 같음`);
   }
 
+  // 수식 블록: 여러 줄 $$ 블록의 여는·닫는 기호는 자기 줄에 혼자 있어야 KaTeX가 깨지지 않는다
+  content.split('\n').forEach((line, i) => {
+    const t = line.trim();
+    if (t.split('$$').length === 2 && t !== '$$') err(`${i + 1}행: $$ 기호는 자기 줄에 혼자 두거나 한 줄 안에서 닫아야 함`);
+  });
+
   // 연계 링크
   for (const key of ['prerequisites', 'next'] as const) {
     const list: string[] = data[key] ?? [];

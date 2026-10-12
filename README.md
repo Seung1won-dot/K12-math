@@ -76,11 +76,15 @@ note: 2015 개정 대비 이동 사항 등  # 선택
 - 그림은 `public/` 아래 SVG. 대체 텍스트 필수.
 - 교과서·참고서 문장과 문제를 그대로 옮기지 않는다. 설명·예제·그림은 직접 작성한다.
 
+## 검토 대기 목록
+
+초안(`draft`)을 `reviewed`로 올리기 전에 확인할 항목은 `docs/review-notes.md`에 단원별로 모아 두었다. 처리한 항목은 `[x]`로 표시한다.
+
 ## 작성 워크플로우
 
 1. `data/units.json`에 단원 추가 → `npm run stubs`
 2. 우선순위(중등 → 고등 공통 → 일반선택 → 진로선택 → 초등 → 기타) 순으로 한 학기씩 작성, `status: draft`
-3. 체크리스트 자기 검토 후 `status: reviewed`, `reviewedAt` 기록
+3. `docs/review-notes.md`의 해당 단원 항목과 계획서 7장 체크리스트로 자기 검토 후 `status: reviewed`, `reviewedAt` 기록
 4. `npm run check` 통과 확인 후 푸시 → 자동 배포
 
 ## 라이선스

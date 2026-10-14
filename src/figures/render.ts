@@ -240,7 +240,10 @@ export function renderNumberline(src: string): string {
   const step = num(s.step ?? 1, 'numberline.step');
   const draw: any[] = s.draw ?? [];
   const hasJump = draw.some((d) => d && 'jump' in d);
-  const top = hasJump ? 58 : 34;
+  // 구간·반직선이 여러 개면 위로 한 줄(라벨 포함 22px)씩 쌓는다
+  const nRows = draw.filter((d) => d && ('interval' in d || 'ray' in d)).length;
+  const rowGap = 22;
+  const top = Math.max(hasJump ? 58 : 34, 34 + Math.max(0, nRows - 1) * rowGap);
   const X = (v: number) => PAD + ((v - a) / (b - a)) * W;
   const Y = top;
   const out: string[] = [ARROW_DEFS];
@@ -257,8 +260,8 @@ export function renderNumberline(src: string): string {
     const where = `numberline.draw[${i}]`;
     if ('point' in d) {
       const v = num(d.point, where);
-      out.push(`<circle cx="${f(X(v))}" cy="${Y}" r="5" class="s-ac ${d.open ? 'f-bg' : 'f-ac'}" stroke-width="2"/>`);
-      if (d.label) out.push(label(X(v), Y - 4, d.label, 'n', 'f-ac'));
+      out.push(`<circle cx="${f(X(v))}" cy="${Y}" r="5" class="${stroke(d.color, 'accent')} ${d.open ? 'f-bg' : fill(d.color, 'accent')}" stroke-width="2"/>`);
+      if (d.label) out.push(label(X(v), Y - 4, d.label, d.pos ?? 'n', fill(d.color, 'accent')));
     } else if ('interval' in d || 'ray' in d) {
       let lo: number, hi: number, openLo = false, openHi = false, arrowLo = false, arrowHi = false;
       if ('ray' in d) {
@@ -269,7 +272,7 @@ export function renderNumberline(src: string): string {
         const o = d.open ?? [false, false];
         [openLo, openHi] = Array.isArray(o) ? o : [o, o];
       }
-      const yy = Y - 14 - rows * 12;
+      const yy = Y - 14 - rows * rowGap;
       rows++;
       const x0 = arrowLo ? PAD - 10 : X(lo), x1 = arrowHi ? PAD + W + 10 : X(hi);
       out.push(`<path d="M${f(x0)},${yy}H${f(x1)}" class="s-ac" stroke-width="3" fill="none"${arrowLo ? ' marker-start="url(#ah-ac)"' : ''}${arrowHi ? ' marker-end="url(#ah-ac)"' : ''}/>`);

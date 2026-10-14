@@ -51,14 +51,16 @@
 
 | 순서 | 항목 | 담는 것 |
 | --- | --- | --- |
-| 1 | **핵심 개념** | 이 단원에서 새로 배우는 것, 정의와 직관 |
+| 1 | **핵심 개념** | 한 줄 요약, 정의와 직관, 생활 속 예 |
 | 2 | **공식·정리** | 공식과 **성립 조건**(정의역, 부호, 단위). 조건 없는 공식은 쓰지 않습니다 |
 | 3 | **왜 성립하는가** | 유도나 증명. 학년에 맞는 방식으로 |
-| 4 | **대표 예제** | 풀이 과정을 생략하지 않은 예제 2~3개 |
-| 5 | **자주 하는 실수와 오개념** | 틀린 생각마다 "왜 틀리는가"와 "어떻게 바로잡는가"를 함께 |
+| 4 | **대표 예제** | (기본)부터 (심화)까지 예제 5개와 풀이 전략, 정답을 접어 둔 스스로 확인 3문제 |
+| 5 | **자주 하는 실수와 오개념** | 4~5개. 틀린 생각마다 "왜 틀리는가"와 "어떻게 바로잡는가"를 함께 |
 | 6 | **앞뒤 학년 연계** | 먼저 볼 단원, 다음 단원 (단원 위쪽 상자와 링크로 표시) |
 
 그 밖의 기능:
+
+- **그림**: 함수 그래프, 도형, 수직선, 수 모형·분수 막대 같은 그림이 단원마다 2~4개(전체 405개) 들어 있습니다. 모두 SVG라 확대해도 깨지지 않고, 다크·라이트 모드 색을 따라갑니다. 작성법은 [`docs/figures.md`](docs/figures.md).
 
 - **검색**: 단원명, 공식, 학생 말투의 질문으로 찾습니다. 서버 없이 브라우저 안에서 동작합니다(Pagefind).
 - **수식**: KaTeX로 그려서 교과서와 같은 모양으로 보입니다.
@@ -104,7 +106,7 @@ npm run build && npm run preview   # http://localhost:4321/K12-math/
 | `npm run build` | 정적 빌드 + Pagefind 검색 색인 생성 → `dist/` |
 | `npm run preview` | 빌드 결과 미리보기 |
 | `npm run stubs` | `data/units.json`에 있는데 파일이 없는 단원을 `status: todo` 빈 틀로 생성 |
-| `npm run validate` | 단원 파일 전수 검사 (항목 순서, 빈 항목, 연계 ID 실존, status 조건, 수식 블록 형식) |
+| `npm run validate` | 단원 파일 전수 검사 (항목 순서, 빈 항목, 연계 ID 실존, status 조건, 수식 블록 형식, 그림 오류) |
 | `npm run check` | validate + build. CI와 동일 |
 
 기술 스택: Astro 7 · Markdown + frontmatter · KaTeX · Pagefind · GitHub Pages(`main` 푸시 시 validate → build → 배포)
@@ -120,9 +122,10 @@ scripts/            gen-stubs.ts, validate.ts (Node 22+ 로 .ts 직접 실행)
 src/
   content.config.ts frontmatter 스키마 (zod)
   lib/units.ts      ID 파싱, 진행률, URL 헬퍼
+  figures/          그림 블록(plot·numberline·svg) → SVG 변환
   layouts/ pages/ components/ styles/
 public/             favicon, SVG 그림
-docs/               검토 목록, README 스크린샷
+docs/               검토 목록, 그림 작성법, README 스크린샷
 .github/workflows/  main 푸시 시 validate → build → Pages 배포
 ```
 

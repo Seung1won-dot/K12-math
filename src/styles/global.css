@@ -246,3 +246,28 @@ hr { border: 0; border-top: 1px solid var(--line); margin: var(--space-8) 0; }
 
 /* 단원 페이지는 전체를 읽기 폭으로 */
 article[data-pagefind-body], .pager, .report { max-width: var(--prose-max); }
+
+/* ---------- 그림 (src/figures). 색은 여기 클래스로만 정해서 테마를 따른다 ---------- */
+.fig { margin: var(--space-6) 0; padding: var(--space-4); background: var(--surface-1); border: 1px solid var(--line); border-radius: var(--radius-md); }
+.fig svg { display: block; width: 100%; max-width: var(--fig-w, 100%); height: auto; margin: 0 auto; overflow: visible; font-family: var(--font-sans); }
+.fig figcaption { margin-top: var(--space-3); color: var(--text-3); font-size: var(--text-sm); line-height: 1.5; text-align: center; }
+.fig .s-base { stroke: var(--text); }
+.fig .s-mute { stroke: var(--text-3); }
+.fig .s-ac { stroke: var(--accent); }
+.fig .s-grid { stroke: var(--line); }
+.fig .f-base { fill: var(--text); }
+.fig .f-mute { fill: var(--text-3); }
+.fig .f-ac { fill: var(--accent); }
+.fig .f-soft { fill: var(--accent-soft); }
+.fig .f-surf { fill: var(--surface-3); }
+.fig .f-bg { fill: var(--surface-1); }
+.fig text { stroke: none; }
+
+/* 한 줄 요약(본문 첫 인용)과 스스로 확인(접기) */
+.prose .summary, .prose h2 + blockquote { margin: 0 0 var(--space-5); padding: var(--space-3) var(--space-4); border-left: 3px solid var(--accent); background: var(--accent-soft); border-radius: 0 var(--radius-md) var(--radius-md) 0; color: var(--text); }
+.prose details { margin: var(--space-3) 0; border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--surface-1); }
+.prose details > summary { cursor: pointer; padding: var(--space-3) var(--space-4); color: var(--accent); font-size: var(--text-md); font-weight: 620; list-style-position: inside; transition: color var(--dur-fast) var(--ease-out); }
+.prose details > summary:hover { color: var(--accent-strong); }
+.prose details[open] > summary { border-bottom: 1px solid var(--line); }
+.prose details > :not(summary) { margin-left: var(--space-4); margin-right: var(--space-4); }
+.prose details > :last-child { margin-bottom: var(--space-4); }

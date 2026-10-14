@@ -4,11 +4,13 @@
  *  - 본문 5개 고정 항목이 순서대로 있는지 (todo 가 아니면 각 항목이 비어 있지 않은지)
  *  - prerequisites / next 가 실제 존재하는 ID인지, 자기 자신을 가리키지 않는지
  *  - reviewed 이상은 prerequisites·next 각 1개 이상 (계획서 성공 기준 '연결성')
+ *  - 그림 블록이 오류 없이 그려지는지, '그림 설명' 글만 남은 곳 (경고)
  *  - data/units.json 에는 있는데 파일이 없는 단원 (경고)
  */
 import fs from 'node:fs';
 import path from 'node:path';
 import matter from 'gray-matter';
+import { renderBlock } from '../src/figures/render.ts';
 import { listContentFiles, readUnitsJson, unitPath, parseId, SECTIONS, OPTIONAL_SECTION, UNIT_ID, STATUSES } from './lib.ts';
 
 const errors: string[] = [];
@@ -36,6 +38,16 @@ for (const { file, data, content } of docs) {
   const status = data.status ?? 'todo';
   if (!STATUSES.includes(status)) err(`status 값 오류: ${status}`);
   if (!Array.isArray(data.keywords) || data.keywords.length === 0) warn('keywords 비어 있음 (검색에 안 걸림)');
+
+  // 그림 블록(```plot / numberline / svg)이 실제로 그려지는지. 빌드 전에 단원 단위로 잡는다
+  const raw = fs.readFileSync(file, 'utf8');
+  const offset = raw.slice(0, raw.indexOf(content)).split('\n').length - 1;
+  for (const m of content.matchAll(/^```(plot|numberline|svg)([^\n]*)\n([\s\S]*?)^```\s*$/gm)) {
+    const line = content.slice(0, m.index).split('\n').length + offset;
+    try { renderBlock(m[1], m[2].trim(), m[3]); } catch (e) { err(`${line}번째 줄 그림: ${(e as Error).message}`); }
+  }
+  const pending = content.match(/\*\*그림 설명[^*]*:\*\*/g)?.length ?? 0;
+  if (pending) warn(`그림 없이 '그림 설명' 글만 ${pending}곳 (plot·numberline·svg 블록으로 바꿀 것)`);
 
   // 본문 항목 순서·내용
   const headings = [...content.matchAll(/^## (.+?)\s*$/gm)].map((m) => m[1].trim());

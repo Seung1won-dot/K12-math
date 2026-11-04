@@ -1,6 +1,6 @@
 /* ==========================================================================
    K12-math 디자인 토큰 — 출처: 옵시디언 30_Projects/🎨 Devpedia — 디자인 가이드.md
-   원칙: 검정 바탕 · 흰 글자 3단계(100/72/56%) · 오렌지 하나. 그림자 대신 1px 선.
+   원칙: 검정 바탕 · 흰 글자 3단계(100/72/56%) · 잉크 블루 하나(오래 읽어도 눈이 편한 낮은 채도). 그림자 대신 1px 선.
         제목은 크고 타이트하게, 본문은 작고 성글게. 반경 4/8/12, 간격 4px 배수.
    움직임 규칙은 docs/design.md. 요약: 홈 히어로·카드·내비게이션 피드백에만,
         단원 본문·수식·그림은 움직이지 않는다. prefers-reduced-motion이면 전부 끈다.
@@ -59,12 +59,12 @@
   --text: #ffffff;
   --text-2: rgb(255 255 255 / 0.72);
   --text-3: rgb(255 255 255 / 0.56);
-  --brand: #ff8e20;
-  --accent: #ff8e20;
-  --accent-strong: #ffa248;
-  --accent-soft: rgb(255 142 32 / 0.1);
-  --accent-line: rgb(255 142 32 / 0.45);
-  --on-accent: #121212;
+  --brand: #8ab4e8;
+  --accent: #8ab4e8;
+  --accent-strong: #a9c9f0;
+  --accent-soft: rgb(138 180 232 / 0.1);
+  --accent-line: rgb(138 180 232 / 0.45);
+  --on-accent: #0b1220;
   --glass-bg: linear-gradient(135deg, rgb(255 255 255 / 0.05), rgb(255 255 255 / 0) 60%);
   --header-bg: rgb(9 9 11 / 0.94);
   color-scheme: dark;
@@ -75,7 +75,7 @@
     --bg: #fafaf9; --surface-1: #ffffff; --surface-2: #f3f3f1; --surface-3: #e9e9e6;
     --line: rgb(23 23 25 / 0.08); --line-strong: rgb(23 23 25 / 0.16);
     --text: #171719; --text-2: rgb(23 23 25 / 0.72); --text-3: rgb(23 23 25 / 0.66);
-    --accent: #a34400; --accent-strong: #853700; --accent-soft: rgb(255 142 32 / 0.12); --accent-line: rgb(163 68 0 / 0.45);
+    --accent: #2f5f9e; --accent-strong: #234a7d; --accent-soft: rgb(47 95 158 / 0.1); --accent-line: rgb(47 95 158 / 0.4);
     --on-accent: #ffffff;
     --glass-bg: linear-gradient(135deg, rgb(23 23 25 / 0.025), rgb(23 23 25 / 0) 60%);
     --header-bg: rgb(250 250 249 / 0.94);
@@ -86,7 +86,7 @@
   --bg: #fafaf9; --surface-1: #ffffff; --surface-2: #f3f3f1; --surface-3: #e9e9e6;
   --line: rgb(23 23 25 / 0.08); --line-strong: rgb(23 23 25 / 0.16);
   --text: #171719; --text-2: rgb(23 23 25 / 0.72); --text-3: rgb(23 23 25 / 0.66);
-  --accent: #a34400; --accent-strong: #853700; --accent-soft: rgb(255 142 32 / 0.12); --accent-line: rgb(163 68 0 / 0.45);
+  --accent: #2f5f9e; --accent-strong: #234a7d; --accent-soft: rgb(47 95 158 / 0.1); --accent-line: rgb(47 95 158 / 0.4);
   --on-accent: #ffffff;
   --glass-bg: linear-gradient(135deg, rgb(23 23 25 / 0.025), rgb(23 23 25 / 0) 60%);
   --header-bg: rgb(250 250 249 / 0.94);
@@ -137,7 +137,7 @@ hr { border: 0; border-top: 1px solid var(--line); margin: var(--space-8) 0; }
 ::view-transition-group(nav-ind) { animation-duration: 260ms; animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1); }
 .site-header { view-transition-name: site-header; }
 
-/* ---- 헤더 (60px sticky, 배경 94% + blur, 아래 hairline, 오렌지 로고 마크) ---- */
+/* ---- 헤더 (60px sticky, 배경 94% + blur, 아래 hairline, 잉크 블루 로고 마크) ---- */
 .site-header { position: sticky; top: 0; z-index: 10; height: var(--header-h); background: var(--header-bg); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
 .site-header__inner { max-width: var(--page-max); margin: 0 auto; padding: 0 var(--gutter); height: 100%; display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); }
 .brand { display: inline-flex; align-items: center; gap: 10px; color: var(--text); font-weight: 700; font-size: var(--text-md); letter-spacing: -0.01em; }
@@ -188,7 +188,7 @@ hr { border: 0; border-top: 1px solid var(--line); margin: var(--space-8) 0; }
 .site-footer__nav a:hover { color: var(--accent); }
 .site-footer__legal { grid-column: 1 / -1; padding-top: var(--space-4); border-top: 1px solid var(--line); }
 
-/* ---- SectionHead: 라벨(오렌지) → 제목 → 설명 ---- */
+/* ---- SectionHead: 라벨(강조색) → 제목 → 설명 ---- */
 .sechead { margin: var(--section-gap) 0 var(--space-6); }
 .sechead:first-child { margin-top: var(--space-10); }
 .sechead__eyebrow { display: block; color: var(--accent); font-size: var(--text-md); font-weight: 620; letter-spacing: -0.01em; line-height: 1.4; margin-bottom: var(--space-2); }
@@ -199,9 +199,8 @@ hr { border: 0; border-top: 1px solid var(--line); margin: var(--space-8) 0; }
 .sechead__lead { margin: var(--space-3) 0 0; color: var(--text-2); font-size: var(--text-lead); line-height: 1.6; max-width: var(--prose-max); text-wrap: pretty; }
 .sechead__aside { margin-top: var(--space-3); color: var(--text-3); font-size: var(--text-sm); }
 
-/* ---- 홈 히어로: 위쪽 가운데 오렌지 10% 발광 하나 + 흐린 수학 기호 판 ---- */
+/* ---- 홈 히어로: 흐린 수학 기호 판 (발광 효과 없음) ---- */
 .hero { position: relative; isolation: isolate; padding: var(--space-6) 0 var(--space-4); }
-.hero::before { content: ''; position: absolute; inset: -80px 0 auto; height: 320px; background: radial-gradient(60% 100% at 50% 0%, var(--accent-soft), transparent 70%); pointer-events: none; z-index: -1; }
 .hero .sechead:first-child { margin-top: var(--space-12); }
 .hero__field { position: absolute; z-index: -1; inset: -40px calc(var(--gutter) * -1) auto; height: 360px; overflow: hidden; pointer-events: none; user-select: none;
   -webkit-mask-image: radial-gradient(55% 85% at 74% 35%, #000 15%, transparent 72%); mask-image: radial-gradient(55% 85% at 74% 35%, #000 15%, transparent 72%); }
@@ -288,7 +287,7 @@ a.card:hover .card__arrow { color: var(--accent); }
 .unit-list a:hover .go, .unit-list a:focus-visible .go { opacity: 1; transform: none; color: var(--accent); }
 @media (max-width: 480px) { .unit-list .area { display: none; } }
 
-/* ---- 칩 (반경 4, 경계 20%, 활성은 오렌지 채움) ---- */
+/* ---- 칩 (반경 4, 경계 20%, 활성은 강조색 채움) ---- */
 .chip { display: inline-flex; align-items: center; height: 24px; padding: 0 var(--space-2); font-size: var(--text-sm); font-weight: 520; color: var(--text-2); border: 1px solid var(--line-strong); border-radius: var(--radius-sm); white-space: nowrap; }
 .chip--todo { color: var(--text-3); border-style: dashed; }
 .chip--draft { color: var(--text-2); }

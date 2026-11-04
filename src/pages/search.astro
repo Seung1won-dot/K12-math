@@ -2,8 +2,26 @@
 import Base from '../layouts/Base.astro';
 import SectionHead from '../components/SectionHead.astro';
 import Search from 'astro-pagefind/components/Search.astro';
+const hints = ['피타고라스', '분수 나눗셈 왜 뒤집어', '이차함수 꼭짓점', '약분', '판별식'];
 ---
 <Base title="검색" section="search">
   <SectionHead as="h1" size="lg" eyebrow="전 학년 통합" title="무엇이 <em>막혔나요</em>" lead="단원명, 공식, 키워드로 초등부터 고등까지 한 번에 찾습니다. 학생이 묻는 말투 그대로 쳐도 됩니다." />
+  <div class="search-hints" aria-label="검색어 예시">
+    <span>예시</span>
+    {hints.map((h) => <button type="button" class="search-hint" data-q={h}>{h}</button>)}
+  </div>
   <Search id="search" className="pagefind-ui" searchboxOptions={{ placeholder: '예: 피타고라스, 분수 나눗셈 왜 뒤집어', autofocus: true }} />
 </Base>
+
+<script>
+  /* 예시 검색어를 누르면 검색창에 넣고 바로 찾는다. JS가 없으면 예시 줄 자체가 숨겨진다(CSS) */
+  document.querySelectorAll<HTMLButtonElement>('.search-hint').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const input = document.querySelector<HTMLInputElement>('.pf-searchbox-input, .pagefind-ui__search-input');
+      if (!input) return;
+      input.value = btn.dataset.q ?? '';
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+      input.focus();
+    });
+  });
+</script>

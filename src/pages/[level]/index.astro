@@ -17,11 +17,22 @@ const lead = { elem: '개념이 처음 나오는 곳입니다. 그림과 구체�
 ---
 <Base title={LEVEL_LABEL[level]} section={level}>
   <SectionHead as="h1" size="lg" eyebrow="학교급" title={`${LEVEL_LABEL[level]} <em>수학</em>`} lead={lead} aside={`${units.length}개 단원 · 작성 ${written} · 검토 완료 ${p.done}`} />
+  {groups.size > 1 && (
+    <ul class="jump" aria-label="학기 바로가기">
+      {[...groups.entries()].map(([group, list]) => <li><a href={`#${group}`}>{groupLabel(level, group)} <small>{list.length}</small></a></li>)}
+    </ul>
+  )}
   {groups.size === 0 && <div class="callout callout--todo"><p class="callout__title">아직 등록된 단원이 없습니다</p><p class="muted"><code>data/units.json</code>에 단원을 추가하고 <code>npm run stubs</code>를 실행하세요.</p></div>}
   {[...groups.entries()].map(([group, list]) => (
-    <section class="term">
+    <section class="term" data-reveal>
       <div class="term__head"><h2 id={group}>{groupLabel(level, group)}</h2><span class="count">{list.filter((u) => u.data.status !== 'todo').length} / {list.length}</span></div>
       <UnitList units={list} />
     </section>
   ))}
 </Base>
+
+<script>
+  /* 학기 섹션이 화면에 들어올 때 단원 줄이 차례로 떠오른다(Motion). 움직임 줄이기면 아무것도 하지 않는다 */
+  import { revealOnView } from '../../scripts/motion';
+  revealOnView(document.querySelectorAll('.term'), '.term__head, .unit-list > li');
+</script>

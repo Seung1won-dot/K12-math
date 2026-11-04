@@ -32,25 +32,40 @@ const nav = [
     <script is:inline>
       /* 깜빡임 방지: 저장된 테마가 있으면 첫 페인트 전에 적용 */
       try { var t = localStorage.getItem('k12-math:theme'); if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t; } catch (e) {}
+      /* 움직임 허용 표시: JS가 돌고 사용자가 움직임 줄이기를 켜지 않았을 때만 '숨겼다 보여 주기'를 쓴다 */
+      (function (d) { d.classList.add('js'); try { if (!matchMedia('(prefers-reduced-motion: reduce)').matches) d.classList.add('motion-ok'); } catch (e) {} })(document.documentElement);
     </script>
   </head>
   <body>
+    <a class="skip-link" href="#main">본문으로 건너뛰기</a>
     <header class="site-header">
       <div class="site-header__inner">
         <a class="brand" href={withBase('/')}><span class="brand__mark" aria-hidden="true">∑</span><span class="brand__text">{siteName}</span></a>
         <nav class="site-nav" aria-label="주요 메뉴">
-          {nav.map((n) => <a href={n.href} aria-current={section === n.key ? 'page' : undefined}>{n.label}</a>)}
+          {nav.map((n) => (
+            <a href={n.href} aria-current={section === n.key ? 'page' : undefined}>
+              {n.label}{section === n.key && <span class="nav-ind" aria-hidden="true"></span>}
+            </a>
+          ))}
           <ThemeToggle />
         </nav>
       </div>
+      <slot name="progress" />
     </header>
-    <main class="container">
+    <main class="container" id="main">
       <slot />
     </main>
     <footer class="site-footer">
       <div class="site-footer__inner">
-        <p>2022 개정 교육과정 기준 · 콘텐츠 CC BY-NC-SA 4.0 · 코드 MIT</p>
-        <p><a href="https://github.com/Seung1won-dot/K12-math">GitHub</a></p>
+        <div class="site-footer__brand">
+          <strong><span class="brand__mark" aria-hidden="true">∑</span>{siteName}</strong>
+          <p>초등 1학년부터 고등 3학년까지. 막히면 앞 학년으로 거슬러 읽는 수학 정리.</p>
+        </div>
+        <nav class="site-footer__nav" aria-label="바닥 메뉴">
+          {nav.map((n) => <a href={n.href}>{n.label}</a>)}
+          <a href="https://github.com/Seung1won-dot/K12-math">GitHub</a>
+        </nav>
+        <p class="site-footer__legal">2022 개정 교육과정 기준 · 콘텐츠 CC BY-NC-SA 4.0 · 코드 MIT</p>
       </div>
     </footer>
   </body>

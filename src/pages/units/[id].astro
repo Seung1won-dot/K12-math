@@ -21,12 +21,17 @@ const next = siblings[idx + 1];
 const prereqs = d.prerequisites.map((id) => byId.get(id)).filter(Boolean) as Unit[];
 const nexts = d.next.map((id) => byId.get(id)).filter(Boolean) as Unit[];
 const isEmpty = d.status === 'todo';
+const ARROW = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+const sections = headings.filter((h) => h.depth === 2);
 const issueUrl = `https://github.com/Seung1won-dot/K12-math/issues/new?title=${encodeURIComponent(`[${d.id}] ${d.title} 오류 신고`)}`;
 ---
 <Base title={d.title} description={`${d.level} ${d.grade} ${d.term ?? ''} ${d.title} — 핵심 개념, 공식, 자주 하는 실수`} section={level}>
+  {!isEmpty && <div slot="progress" class="read-progress" aria-hidden="true"></div>}
+  <div class="unit-layout">
+  <div class="unit-main">
   <article data-pagefind-body>
     <nav class="crumbs" aria-label="현재 위치" data-pagefind-ignore>
-      <a href={levelUrl(level)}>{LEVEL_LABEL[level]}</a><span>›</span><a href={`${levelUrl(level)}#${group}`}>{groupLabel(level, group)}</a>
+      <a href={levelUrl(level)}>{LEVEL_LABEL[level]}</a><span class="sep" aria-hidden="true">/</span><a href={`${levelUrl(level)}#${group}`}>{groupLabel(level, group)}</a>
     </nav>
     <header class="unit-head">
       <h1>{d.title}</h1>
@@ -41,7 +46,7 @@ const issueUrl = `https://github.com/Seung1won-dot/K12-math/issues/new?title=${e
     {prereqs.length > 0 && (
       <aside class="callout" data-pagefind-ignore>
         <p class="callout__title">이 단원이 어려우면 먼저 볼 단원</p>
-        <ul>{prereqs.map((u) => <li><a href={unitUrl(u.data.id)}>{u.data.title}</a> <span class="muted">{u.data.level} {u.data.grade}{u.data.term ? ` ${u.data.term}` : ''}</span></li>)}</ul>
+        <ul class="linklist">{prereqs.map((u) => <li><a class="linkcard" href={unitUrl(u.data.id)}><span class="linkcard__title">{u.data.title}</span> <span class="linkcard__meta">{u.data.level} {u.data.grade}{u.data.term ? ` ${u.data.term}` : ''}</span><Fragment set:html={ARROW} /></a></li>)}</ul>
       </aside>
     )}
 
@@ -54,7 +59,7 @@ const issueUrl = `https://github.com/Seung1won-dot/K12-math/issues/new?title=${e
       <>
         {headings.length > 0 && (
           <nav class="toc" aria-label="단원 목차" data-pagefind-ignore>
-            {headings.filter((h) => h.depth === 2).map((h) => <a href={`#${h.slug}`}>{h.text}</a>)}
+            {sections.map((h) => <a href={`#${h.slug}`}>{h.text}</a>)}
           </nav>
         )}
         <div class="prose"><Content /></div>
@@ -64,15 +69,56 @@ const issueUrl = `https://github.com/Seung1won-dot/K12-math/issues/new?title=${e
     {nexts.length > 0 && (
       <aside class="callout" data-pagefind-ignore>
         <p class="callout__title">이 다음에 배우는 단원</p>
-        <ul>{nexts.map((u) => <li><a href={unitUrl(u.data.id)}>{u.data.title}</a> <span class="muted">{u.data.level} {u.data.grade}{u.data.term ? ` ${u.data.term}` : ''}</span></li>)}</ul>
+        <ul class="linklist">{nexts.map((u) => <li><a class="linkcard" href={unitUrl(u.data.id)}><span class="linkcard__title">{u.data.title}</span> <span class="linkcard__meta">{u.data.level} {u.data.grade}{u.data.term ? ` ${u.data.term}` : ''}</span><Fragment set:html={ARROW} /></a></li>)}</ul>
       </aside>
     )}
     {d.note && <p class="muted" data-pagefind-ignore>비고: {d.note}</p>}
   </article>
 
   <nav class="pager" aria-label="이전·다음 단원">
-    {prev ? <a href={unitUrl(prev.data.id)}><span>이전 단원</span>{prev.data.title}</a> : <span />}
-    {next ? <a class="next" href={unitUrl(next.data.id)}><span>다음 단원</span>{next.data.title}</a> : <span />}
+    {prev ? <a href={unitUrl(prev.data.id)}><span><i aria-hidden="true">←</i>이전 단원</span>{prev.data.title}</a> : <span />}
+    {next ? <a class="next" href={unitUrl(next.data.id)}><span>다음 단원<i aria-hidden="true">→</i></span>{next.data.title}</a> : <span />}
   </nav>
   <p class="report">틀린 내용을 찾으셨나요? <a href={issueUrl} target="_blank" rel="noopener">오류 신고</a></p>
+  </div>
+
+  {!isEmpty && sections.length > 0 && (
+    <aside class="unit-side" data-pagefind-ignore>
+      <nav class="side-toc" aria-label="이 단원 목차">
+        <p class="side-toc__title">이 단원에서</p>
+        <ol>{sections.map((h, i) => <li><a href={`#${h.slug}`}><span class="num">{String(i + 1).padStart(2, '0')}</span><span>{h.text}</span></a></li>)}</ol>
+        <a class="side-toc__top" href="#main">맨 위로 ↑</a>
+      </nav>
+    </aside>
+  )}
+  </div>
 </Base>
+
+<script>
+  /* 단원 페이지에는 애니메이션 라이브러리를 싣지 않는다. 옆 목차의 현재 위치 표시와(스크롤 연동 CSS가 없는 브라우저용) 읽기 막대만 */
+  const links = [...document.querySelectorAll<HTMLAnchorElement>('.side-toc ol a')];
+  const heads = links.map((a) => document.getElementById(decodeURIComponent(a.hash.slice(1)))).filter((h): h is HTMLElement => !!h);
+  if (heads.length) {
+    // 화면 위쪽 40% 선을 지난 마지막 제목이 현재 절
+    const setCurrent = () => {
+      const passed = heads.filter((h) => h.getBoundingClientRect().top < window.innerHeight * 0.4);
+      const cur = passed[passed.length - 1] ?? heads[0];
+      links.forEach((a) => a.setAttribute('aria-current', String(decodeURIComponent(a.hash.slice(1)) === cur.id)));
+    };
+    const io = new IntersectionObserver(setCurrent, { rootMargin: '0px 0px -60% 0px' });
+    heads.forEach((h) => io.observe(h));
+    setCurrent();
+  }
+
+  const bar = document.querySelector<HTMLElement>('.read-progress');
+  if (bar && !CSS.supports('animation-timeline: scroll()')) {
+    let ticking = false;
+    const update = () => {
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      bar.style.transform = `scaleX(${max > 0 ? Math.min(1, window.scrollY / max) : 0})`;
+      ticking = false;
+    };
+    window.addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(update); } }, { passive: true });
+    update();
+  }
+</script>

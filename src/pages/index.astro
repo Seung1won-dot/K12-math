@@ -2,32 +2,115 @@
 import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
 import SectionHead from '../components/SectionHead.astro';
-import { LEVEL_LABEL, levelUrl, progress, parseId, withBase, type Level } from '../lib/units';
+import { HIGH_SUBJECT, LEVEL_LABEL, groupLabel, levelUrl, progress, parseId, unitUrl, withBase, type Level, type Unit } from '../lib/units';
 
 const all = await getCollection('units');
+const byId = new Map(all.map((u) => [u.data.id, u]));
 const levels: Level[] = ['elem', 'mid', 'high'];
 const total = progress(all);
 const written = all.filter((u) => u.data.status !== 'todo').length;
+
+const levelInfo: Record<Level, { range: string; desc: string }> = {
+  elem: { range: '1~6학년', desc: '수와 연산, 도형의 뜻이 처음 나오는 곳. 그림과 구체물로 익힙니다.' },
+  mid: { range: '1~3학년', desc: '문자와 식, 함수, 증명이 시작됩니다. 오개념이 가장 많이 모이는 구간.' },
+  high: { range: '공통·선택과목', desc: '공통수학1·2부터. 수능 공통 범위는 자세히, 나머지는 요약으로.' },
+};
+
+/* 학년별 단원 수 (차트). 초·중은 학년 단위로 두 학기를 합치고, 고등은 과목 단위 */
+type Bar = { label: string; aria: string; href: string; total: number; done: number };
+const chart = levels.map((lv) => {
+  const units = all.filter((u) => parseId(u.data.id).level === lv);
+  const keyOf = (u: Unit) => { const g = parseId(u.data.id).group; return lv === 'high' ? g : g.split('-')[0]; };
+  const keys = [...new Set(units.map(keyOf))].sort((a, b) => a.localeCompare(b, 'en', { numeric: true }));
+  const bars: Bar[] = keys.map((k) => {
+    const list = units.filter((u) => keyOf(u) === k);
+    const firstGroup = lv === 'high' ? k : (list.map((u) => parseId(u.data.id).group).sort()[0] ?? `${k}-1`);
+    const name = lv === 'high' ? (HIGH_SUBJECT[k] ?? k) : `${LEVEL_LABEL[lv]} ${k}학년`;
+    return {
+      label: lv === 'high' ? (HIGH_SUBJECT[k] ?? k).replace('공통수학', '공통') : k,
+      aria: `${name} ${list.length}단원`,
+      href: `${levelUrl(lv)}#${firstGroup}`,
+      total: list.length,
+      done: list.filter((u) => u.data.status !== 'todo').length,
+    };
+  });
+  return { lv, short: { elem: '초등', mid: '중등', high: '고등' }[lv], bars };
+}).filter((g) => g.bars.length > 0);
+const maxBar = Math.max(1, ...chart.flatMap((g) => g.bars.map((b) => b.total)));
+
+/* 거슬러 읽는 길: 고1 이차방정식과 이차함수에서 출발해 "다른 학년의 선수 단원"을 따라 내려간다 (실제 prerequisites) */
+const chain: Unit[] = [];
+let cur = byId.get('high-c1-05');
+while (cur && chain.length < 5) {
+  chain.push(cur);
+  const g = parseId(cur.data.id).group;
+  cur = cur.data.prerequisites.map((id) => byId.get(id)).find((u) => u && parseId(u.data.id).group !== g && !chain.includes(u));
+}
+const gradeOf = (u: Unit) => { const { level, group } = parseId(u.data.id); return level === 'high' ? groupLabel(level, group) : `${{ elem: '초', mid: '중' }[level as 'elem' | 'mid']}${group.split('-')[0]}`; };
+
+/* 히어로 제목: 글자 단위로 쪼개 Anime.js가 한 글자씩 올린다. 화면 낭독기는 sr-only 원문을 읽는다 */
+const heroText = '수학을 한눈에, 막히면 앞 학년으로';
+const heroWords: { text: string; em?: boolean }[][] = [
+  [{ text: '수학을' }], [{ text: '한눈에', em: true }, { text: ',' }], [{ text: '막히면' }], [{ text: '앞' }], [{ text: '학년으로' }],
+];
+
+/* 히어로 뒤 수학 기호 판. 가운데서 멀수록 흐리게(정적 값). JS가 돌면 가운데부터 물결처럼 퍼진다 */
+const COLS = 21, ROWS = 7;
+const SYMS = ['+', '−', '×', '÷', '=', 'π', '√', '∑', '∫', '∞', '△', '∠', '≤', '%', '½', 'θ', 'x', 'y', '²', '±', '∈', '≠'];
+const field = Array.from({ length: COLS * ROWS }, (_, i) => {
+  const c = i % COLS, r = Math.floor(i / COLS);
+  const cx = Math.round((COLS - 1) * 0.72); // 오른쪽 위 — 왼쪽 정렬된 제목·설명과 덜 겹치게
+  const dx = (c - cx) / ((COLS - 1) / 2), dy = (r - 1.6) / (ROWS - 1);
+  const dist = Math.min(1, Math.hypot(dx, dy * 1.4));
+  const seed = (i * 7919 + 13) % 101;
+  const o = +(0.05 + (1 - dist) * 0.13 + (seed % 5) * 0.006).toFixed(3);
+  return { s: SYMS[(i * 37 + r * 11) % SYMS.length], o, ac: seed % 23 === 0 };
+});
 ---
 <Base title="수학 전체 정리">
-  <section class="hero">
-    <SectionHead as="h1" size="display" eyebrow="초등 1학년부터 고등 3학년까지" title="수학을 <em>한눈에</em>, 막히면 앞 학년으로" lead="대학 입학 전에 배우는 모든 수학 개념과 공식을 학년·학기·단원 순으로 정리합니다. 어려운 단원 위에는 먼저 볼 단원이 있습니다. 거기서부터 다시 읽으면 됩니다." />
-    <a class="search-cta" href={withBase('/search/')}>
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-      단원명, 공식, "분수 나눗셈 왜 뒤집어" 같은 질문으로 검색
-    </a>
+  <section class="hero" data-hero>
+    <div class="hero__field" aria-hidden="true" data-reveal>
+      <div class="hero__grid" style={`--cols:${COLS}`} data-cols={COLS} data-rows={ROWS}>
+        {field.map((f) => <span class:list={['hero__sym', f.ac && 'hero__sym--ac']} style={`--o:${f.o}`} data-o={f.o}>{f.s}</span>)}
+      </div>
+    </div>
+    <span class="hero__eyebrow" data-hero-fade data-reveal>초등 1학년부터 고등 3학년까지</span>
+    <h1 class="hero__title" data-reveal>
+      <span class="sr-only">{heroText}</span>
+      <span aria-hidden="true">
+        {heroWords.map((word, wi) => (
+          <Fragment>
+            {wi > 0 && ' '}
+            <span class="w">
+              {word.map((part) => part.em
+                ? <em>{[...part.text].map((ch) => <span class="ch">{ch}</span>)}</em>
+                : [...part.text].map((ch) => <span class="ch">{ch}</span>))}
+            </span>
+          </Fragment>
+        ))}
+      </span>
+    </h1>
+    <p class="hero__lead" data-hero-fade data-reveal>대학 입학 전에 배우는 모든 수학 개념과 공식을 학년·학기·단원 순으로 정리합니다. 어려운 단원 위에는 먼저 볼 단원이 있습니다. 거기서부터 다시 읽으면 됩니다.</p>
+    <div class="hero__actions" data-hero-fade data-reveal>
+      <a class="search-cta" href={withBase('/search/')}>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <span>단원명, 공식, "분수 나눗셈 왜 뒤집어" 같은 질문으로 검색</span>
+      </a>
+    </div>
   </section>
 
   <SectionHead eyebrow="학교급" title="어디서부터 <em>볼까</em>" lead="학년과 학기를 고르면 단원 목록이 나옵니다." />
-  <div class="cards">
+  <div class="cards" data-reveal-group>
     {levels.map((lv) => {
       const units = all.filter((u) => parseId(u.data.id).level === lv);
       const p = progress(units);
       const w = units.filter((u) => u.data.status !== 'todo').length;
       return (
-        <a class="card" href={levelUrl(lv)}>
-          <span class="card__eyebrow">{lv === 'elem' ? '1~6학년' : lv === 'mid' ? '1~3학년' : '공통·선택과목'}</span>
+        <a class="card level-card" href={levelUrl(lv)} data-reveal data-card>
+          <svg class="card__arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg>
+          <span class="card__eyebrow">{levelInfo[lv].range}</span>
           <h3 class="card__title">{LEVEL_LABEL[lv]}</h3>
+          <p class="card__desc">{levelInfo[lv].desc}</p>
           <div class="bar"><span style={`width:${p.total ? Math.round((w / p.total) * 100) : 0}%`}></span></div>
           <span class="card__meta">{w} / {p.total} 단원 작성 · 검토 완료 {p.done}</span>
         </a>
@@ -35,10 +118,126 @@ const written = all.filter((u) => u.data.status !== 'todo').length;
     })}
   </div>
 
+  <SectionHead eyebrow="학년별 단원 수" title="학년마다 <em>몇 단원</em>인가" lead="막대를 누르면 그 학년 단원 목록으로 갑니다." />
+  <figure class="gchart" data-chart data-reveal>
+    <div class="gchart__plot">
+      {chart.map((g) => (
+        <div class="gchart__group" style={`--n:${g.bars.length}`}>
+          <div class="gchart__bars">
+            {g.bars.map((b) => (
+              <a class="gchart__bar" href={b.href} aria-label={b.aria}>
+                <span class="gchart__val" aria-hidden="true">{b.total}</span>
+                <span class="gchart__col" style={`--h:${(b.total / maxBar).toFixed(3)}`} aria-hidden="true">
+                  {b.total - b.done > 0 && <span class="gchart__todo" style={`--todo:${b.total - b.done}`}></span>}
+                  {b.done > 0 && <span class="gchart__done" style={`--done:${b.done}`}></span>}
+                </span>
+              </a>
+            ))}
+          </div>
+          <div class="gchart__x" aria-hidden="true">{g.bars.map((b) => <span class="gchart__lbl">{b.label}</span>)}</div>
+          <span class="gchart__glabel">{g.short}</span>
+        </div>
+      ))}
+    </div>
+    <figcaption><span class="gchart__key">작성된 단원</span><span class="gchart__key gchart__key--todo">아직 빈 단원</span><span>전체 {total.total}단원</span></figcaption>
+  </figure>
+
+  {chain.length > 1 && (
+    <>
+      <SectionHead eyebrow="이렇게 쓰세요" title="막히면 <em>거슬러</em> 읽기" lead={`‘${chain[0].data.title}’ 단원이 어렵다면, 먼저 볼 단원을 따라 아래 학년으로 내려가 봅니다. 실제 단원 연결 그대로입니다.`} />
+      <ol class="path" data-reveal-group>
+        {chain.map((u, i) => (
+          <li data-reveal>
+            <a href={unitUrl(u.data.id)}>
+              <span class="path__step">{i === 0 ? '지금 막힌 곳' : `${i}단계 아래`}</span>
+              <span class="path__grade">{gradeOf(u)}</span>
+              <span class="path__title">{u.data.title}</span>
+            </a>
+          </li>
+        ))}
+      </ol>
+    </>
+  )}
+
   <SectionHead eyebrow="진행 상황" title="지금까지 <em>얼마나</em> 채웠나" />
-  <div class="cards">
-    <div class="card card--glass"><span class="card__eyebrow">전체 단원</span><div class="kpi">{total.total}<small>개</small></div></div>
-    <div class="card card--glass"><span class="card__eyebrow">작성된 단원</span><div class="kpi">{written}<small>개</small></div></div>
-    <div class="card card--glass"><span class="card__eyebrow">검토 완료</span><div class="kpi">{total.done}<small>개</small></div></div>
+  <div class="cards" data-reveal-group>
+    <div class="card card--glass" data-reveal><span class="card__eyebrow">전체 단원</span><div class="kpi"><span data-count>{total.total}</span><small>개</small></div></div>
+    <div class="card card--glass" data-reveal><span class="card__eyebrow">작성된 단원</span><div class="kpi"><span data-count>{written}</span><small>개</small></div></div>
+    <div class="card card--glass" data-reveal><span class="card__eyebrow">검토 완료</span><div class="kpi"><span data-count>{total.done}</span><small>개</small></div></div>
   </div>
 </Base>
+
+<script>
+  /* 히어로(첫 화면)는 Anime.js, 그 아래 카드·차트·숫자는 Motion. 둘 다 이 페이지에서만 싣는다 */
+  import { animate as anime, stagger as aStagger, utils } from 'animejs';
+  import { animate, inView, press, stagger, motionOk, revealOnView, cardFeedback, SNAPPY } from '../scripts/motion';
+
+  if (motionOk()) {
+    const hero = document.querySelector<HTMLElement>('[data-hero]');
+    if (hero) {
+      const title = hero.querySelector<HTMLElement>('.hero__title')!;
+      const chars = title.querySelectorAll<HTMLElement>('.ch');
+      const fades = hero.querySelectorAll<HTMLElement>('[data-hero-fade]');
+      const fieldWrap = hero.querySelector<HTMLElement>('.hero__field')!;
+      const grid = fieldWrap.querySelector<HTMLElement>('.hero__grid')!;
+      const syms = grid.querySelectorAll<HTMLElement>('.hero__sym');
+
+      // 넘겨받기: 인라인으로 첫 상태를 정한 뒤 CSS 숨김을 푼다
+      utils.set(chars, { opacity: 0, translateY: '0.55em' });
+      utils.set(fades, { opacity: 0, translateY: 10 });
+      utils.set(syms, { opacity: 0, scale: 0.4 });
+      for (const el of [title, fieldWrap, ...fades]) el.dataset.reveal = 'on';
+
+      // 제목 글자가 한 글자씩 떠오른다
+      anime(chars, { opacity: 1, translateY: 0, duration: 760, delay: aStagger(38, { start: 120 }), ease: 'out(4)' });
+      anime(fades, { opacity: 1, translateY: 0, duration: 600, delay: aStagger(110, { start: 380 }), ease: 'out(3)' });
+
+      // 기호 판: 가운데에서 바깥으로 물결 — 한 번 밝아졌다가 원래 흐린 값으로 가라앉는다
+      const cols = Number(grid.dataset.cols), rows = Number(grid.dataset.rows);
+      const peak = (el: HTMLElement) => Math.min(0.55, Number(el.dataset.o) * 3.2);
+      anime(syms, {
+        opacity: [{ to: (el) => peak(el as HTMLElement), duration: 420, ease: 'out(2)' }, { to: (el) => Number((el as HTMLElement).dataset.o), duration: 1100, ease: 'inOut(2)' }],
+        scale: [{ to: 1.15, duration: 420, ease: 'out(3)' }, { to: 1, duration: 700, ease: 'out(2)' }],
+        delay: aStagger(42, { grid: [cols, rows], from: Math.round((cols - 1) * 0.72) + cols * 2 }),
+      });
+    }
+  }
+
+  revealOnView(document.querySelectorAll('[data-reveal-group]'), '[data-reveal]');
+  cardFeedback(document.querySelectorAll('[data-card]'));
+  // 숫자 세기: 화면에 들어오면 0에서 원래 값(JS 없이 보이는 값)까지. 홈에 이미 실린 Anime.js로 센다
+  if (motionOk()) {
+    document.querySelectorAll<HTMLElement>('[data-count]').forEach((el) => {
+      const target = Number(el.textContent);
+      if (!Number.isFinite(target) || target === 0) return;
+      inView(el, () => {
+        const n = { v: 0 };
+        el.textContent = '0';
+        anime(n, { v: target, duration: 900, ease: 'out(4)', onUpdate: () => (el.textContent = String(Math.round(n.v))) });
+      });
+    });
+  }
+
+  // 차트: 막대가 바닥에서 스프링으로 자란다
+  const chart = document.querySelector<HTMLElement>('[data-chart]');
+  if (chart && motionOk()) {
+    const cols = chart.querySelectorAll<HTMLElement>('.gchart__col');
+    const vals = chart.querySelectorAll<HTMLElement>('.gchart__val');
+    chart.style.opacity = '0';
+    chart.dataset.reveal = 'on';
+    cols.forEach((c) => (c.style.scale = '1 0'));
+    vals.forEach((v) => (v.style.opacity = '0'));
+    inView(chart, () => {
+      animate(chart, { opacity: [0, 1], translate: ['0 14px', '0 0'] }, { duration: 0.45, ease: [0.22, 1, 0.36, 1] });
+      animate(cols, { scale: ['1 0', '1 1'] }, { ...SNAPPY, stiffness: 170, damping: 20, delay: stagger(0.045, { startDelay: 0.15 }) });
+      animate(vals, { opacity: [0, 1], translate: ['0 6px', '0 0'] }, { duration: 0.35, delay: stagger(0.045, { startDelay: 0.45 }) });
+    }, { amount: 0.3 });
+    // 막대는 누를 때만 살짝 눌린다 (올림 효과는 CSS 색 변화로 충분)
+    press(chart.querySelectorAll('.gchart__bar'), (el) => {
+      const col = el.querySelector('.gchart__col');
+      if (!col) return;
+      animate(col, { scale: '0.86 1' }, SNAPPY);
+      return () => animate(col, { scale: '1 1' }, SNAPPY);
+    });
+  }
+</script>

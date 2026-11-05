@@ -55,7 +55,7 @@ draw:
 | 점 | `point: [2, -3]` | `label`, `pos`, `open: true`(빈 점), `guide: true`(축까지 점선) |
 | 글자 | `text: "6 m"` + `at: [3, 0]` | `pos`, `size` |
 
-공통 키: `color: accent | base | mute`(강조 주황 / 기본 글자색 / 흐린 색), `dash: true`, `width`(선 굵기).
+공통 키: `color: accent | base | mute`(강조 잉크 블루 / 기본 글자색 / 흐린 색), `dash: true`, `width`(선 굵기).
 `pos`는 라벨을 기준점의 어느 쪽에 둘지: `n s e w ne nw se sw c`(북·남·동·서…, `c`는 가운데).
 
 **식 쓰는 법.** `+ - * / ^`, 괄호, `2x`·`3(x+1)` 같은 곱셈 생략, `sqrt abs sin cos tan ln log exp`, 상수 `pi e`. 분수 지수 `x^(1/3)`은 음수에서도 실수 세제곱근이 된다. 점근선 근처에서 그래프가 크게 튀면 자동으로 끊는다.
@@ -95,14 +95,14 @@ draw:
 ````
 
 - `viewBox`가 반드시 있어야 하고, 그 너비가 최대 표시 폭이 된다(240~520 권장).
-- **색은 클래스로만**: 선 `s-base s-mute s-ac`, 채우기 `f-base f-mute f-ac f-soft`(연한 주황) `f-surf`(회색 면) `f-bg`(배경색, 빈 점). `fill="none"`만 직접 쓸 수 있다. `#fff`, `red` 같은 색 값은 오류.
-- 화살표 머리: `marker-end="url(#ah)"`(기본색), `url(#ah-ac)`(주황).
+- **색은 클래스로만**: 선 `s-base s-mute s-ac`, 채우기 `f-base f-mute f-ac f-soft`(연한 강조색) `f-surf`(회색 면) `f-bg`(배경색, 빈 점). `fill="none"`만 직접 쓸 수 있다. `#fff`, `red` 같은 색 값은 오류.
+- 화살표 머리: `marker-end="url(#ah)"`(기본색), `url(#ah-ac)`(강조색).
 - `<script>`, `onclick` 같은 속성, 외부 링크는 오류.
 - 글자는 `font-size` 12~16. 변수 한 글자는 `font-style="italic"`.
 
 ## 그림 원칙
 
 1. **설명을 대신하지 않고 돕는다.** 그림만 보고 알 수 있게 하되, 본문에도 같은 내용이 있어야 한다.
-2. **강조는 하나.** 주황(`accent`)은 지금 봐야 할 것 한 가지에만. 나머지는 `base`, `mute`.
+2. **강조는 하나.** 강조색(`accent`)은 지금 봐야 할 것 한 가지에만. 나머지는 `base`, `mute`.
 3. **숫자는 정확히.** 그래프의 점·교점·꼭짓점 좌표는 본문 계산과 일치해야 한다. 라벨 좌표를 쓰기 전에 직접 계산해 확인한다.
 4. **장식 그림 금지.** 이해에 필요하지 않은 그림은 넣지 않는다.

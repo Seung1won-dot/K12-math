@@ -1,0 +1,29 @@
+---
+import Base from '../layouts/Base.astro';
+import SectionHead from '../components/SectionHead.astro';
+import { LEVEL_LABEL, levelUrl, withBase, type Level } from '../lib/units';
+
+const levels: Level[] = ['elem', 'mid', 'high'];
+---
+<Base title="페이지를 찾을 수 없음" description="요청한 페이지가 없습니다. 학교급 목록이나 검색에서 단원을 찾아 보세요." noindex>
+  <SectionHead as="h1" size="lg" eyebrow="404" title="이 주소에는 <em>페이지가 없습니다</em>" lead="주소가 바뀌었거나 아직 쓰지 않은 단원일 수 있습니다. 검색하거나 학교급 목록에서 다시 찾아 보세요." />
+  <a class="search-cta" href={withBase('/search/')}>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+    단원명이나 공식으로 검색
+  </a>
+  <div class="cards notfound__levels">
+    {levels.map((lv) => (
+      <a class="card" href={levelUrl(lv)}>
+        <h2 class="card__title">{LEVEL_LABEL[lv]}</h2>
+        <span class="card__meta">단원 목록 보기</span>
+      </a>
+    ))}
+  </div>
+  <p class="notfound__home"><a href={withBase('/')}>홈으로 돌아가기</a></p>
+</Base>
+
+<style>
+  .search-cta { margin-top: var(--space-8); max-width: 480px; }
+  .notfound__levels { margin-top: var(--space-6); }
+  .notfound__home { margin: var(--space-8) 0 0; font-size: var(--text-md); }
+</style>

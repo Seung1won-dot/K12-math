@@ -8,9 +8,13 @@ interface Props {
   title: string;
   description?: string;
   section?: 'elem' | 'mid' | 'high' | 'search';
+  /** 404처럼 검색엔진 색인·canonical이 필요 없는 페이지 */
+  noindex?: boolean;
 }
-const { title, description = '초등부터 고등까지 수학 개념과 공식을 학년별로 정리한 사이트', section } = Astro.props;
+const { title, description = '초등부터 고등까지 수학 개념과 공식을 학년별로 정리한 사이트', section, noindex = false } = Astro.props;
 const siteName = '수학 전체 정리';
+const fullTitle = title === siteName ? title : `${title} · ${siteName}`;
+const canonical = noindex || !Astro.site ? undefined : new URL(Astro.url.pathname, Astro.site).href;
 const nav = [
   { href: withBase('/elem/'), label: '초등', key: 'elem' },
   { href: withBase('/mid/'), label: '중등', key: 'mid' },
@@ -27,8 +31,19 @@ const nav = [
     <meta name="generator" content={Astro.generator} />
     <meta name="description" content={description} />
     <meta name="color-scheme" content="dark light" />
+    <meta name="theme-color" content="#09090b" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#fafaf9" media="(prefers-color-scheme: light)" />
     <link rel="icon" type="image/svg+xml" href={withBase('/favicon.svg')} />
-    <title>{title === siteName ? title : `${title} · ${siteName}`}</title>
+    {canonical && <link rel="canonical" href={canonical} />}
+    <title>{fullTitle}</title>
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={siteName} />
+    <meta property="og:locale" content="ko_KR" />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    {canonical && <meta property="og:url" content={canonical} />}
+    <meta name="twitter:card" content="summary" />
+    {noindex && <meta name="robots" content="noindex" />}
     <script is:inline>
       /* 깜빡임 방지: 저장된 테마가 있으면 첫 페인트 전에 적용 */
       try { var t = localStorage.getItem('k12-math:theme'); if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t; } catch (e) {}

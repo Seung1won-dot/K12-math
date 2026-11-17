@@ -20,7 +20,7 @@
 | 기술 스택 | Astro 7 · Markdown + frontmatter · KaTeX · Pagefind · Motion · Anime.js |
 | 배포 | GitHub Pages (`main` 푸시 시 validate → build → 배포). 공개 주소 `https://seung1won-dot.github.io/K12-math/`는 준비 중 |
 | 상태 | 119단원 초안 완료 · 검토 완료 0 |
-| 라이선스 | 콘텐츠 CC BY-NC-SA 4.0, 코드 MIT (확정 전) |
+| 라이선스 | 콘텐츠 [CC BY-NC-SA 4.0](content/LICENSE), 코드 [MIT](LICENSE) |
 
 ## 목차
 

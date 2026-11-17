@@ -19,9 +19,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
--------------------------------------------------------------------------------
-
-위 MIT 라이선스는 이 저장소의 코드(src/, scripts/, 설정 파일 등)에 적용됩니다.
-content/ 폴더의 수학 설명 글(개념·공식·증명·예제)은 CC BY-NC-SA 4.0 을
-따릅니다. 전문은 content/LICENSE 에 있습니다.

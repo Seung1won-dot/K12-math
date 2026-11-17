@@ -130,3 +130,8 @@ docs/             작성 안내 · 디자인/모션 규칙 · 그림 작성법 �
 - [디자인 · 움직임 규칙](docs/design.md) — 조판, 모션을 쓰는 곳과 쓰지 않는 곳, 동작 줄이기 대응
 - [그림 작성법](docs/figures.md) — `plot` · `numberline` · `svg` 블록
 - [검토 목록](docs/review-notes.md) — 단원별로 확인할 항목
+
+## 라이선스
+
+- **코드** (`src/`, `scripts/`, 설정 파일) — [MIT](LICENSE)
+- **콘텐츠** (`content/` 의 개념·공식·증명·예제 글) — [CC BY-NC-SA 4.0](content/LICENSE). 출처를 밝히고, 비영리로, 같은 조건으로 공유할 때 자유롭게 쓸 수 있습니다.
